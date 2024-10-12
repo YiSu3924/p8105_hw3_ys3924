@@ -6,6 +6,33 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(p8105.datasets)
+library(tidyverse)
 ```
+
+# Problem 1
+
+### Read in NY NOAA data
+```{r}
+data("ny_noaa") 
+ny_noaa = ny_noaa |>
+  janitor::clean_names() |> 
+  separate(date, c('year', 'month', 'day'), sep ='-') |>
+  mutate(prcp = as.numeric(prcp),
+         tmax = as.numeric(tmax),
+         tmin = as.numeric(tmin),
+         prcp = prcp / 10,
+         tmax = tmax / 10,
+         tmin = tmin / 10)
+```
+
+Count the snow fall
+```{r}
+snowfall_counts = ny_noaa |>
+  count(snow) |>
+  arrange(desc(n)) |>
+  slice(1)
+```
+
+For snowfall, the most commonly observed values is `r snowfall_counts`.
 
