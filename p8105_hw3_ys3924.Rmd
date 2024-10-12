@@ -1,0 +1,11 @@
+---
+title: "p8105_hw3_ys3924"
+author: "YISU"
+date: "2024-10-12"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
