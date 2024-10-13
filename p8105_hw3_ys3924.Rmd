@@ -222,5 +222,17 @@ citi_data |>
 Across all time periods, Citi Bike members consistently outnumber casual riders in terms of total rides. Also, both rider types show an increase in rides from January to July in each year. Over the span of four years, the number of both casual and member riders grew from 2020 to 2024.
 
 
+### Produce table showing the 5 most popular starting stations for July 2024
+
+```{r}
+july_2024 |>
+  group_by(start_station_name) |>
+  summarise(total_rides = n()) |>
+  arrange(desc(total_rides)) |>
+  head(5) |>
+  knitr::kable()
+```
+
+The 5 most popular starting stations for July 2024 are Pier 61 at Chelsea Piers, University Pl & E 14 St, W 21 St & 6 Ave, West St & Chambers St, and W 31 St & 7 Ave.
 
 
