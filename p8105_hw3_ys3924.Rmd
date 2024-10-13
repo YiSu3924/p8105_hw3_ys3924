@@ -40,6 +40,7 @@ snowfall_counts = ny_noaa |>
   count(snow) |>
   arrange(desc(n)) |>
   slice(1)
+snowfall_counts
 ```
 
 For snowfall, the most commonly observed values is 0, which contains 2008508 observations.
@@ -88,4 +89,25 @@ plot_ii = ny_noaa |>
   labs(title = "Snowfall Distribution by Year", x = "Year", y = "Average Snowfall") +
   theme_minimal()
 plot_i + plot_ii
+```
+
+
+# Problem 2
+
+### Read in and clean accelerometer and demographic data
+```{r, message=FALSE}
+accel_data = read_csv("./data/nhanes_accel.csv") |>
+  janitor::clean_names() |>
+  mutate(seqn = as.character(seqn))
+covar_data = read_csv("./data/nhanes_covar.csv", skip = 3) |>
+  janitor::row_to_names(row_number = 1) |>
+  janitor::clean_names() |>
+  mutate(
+    sex = factor(sex, levels = c(1, 2), labels = c("Male", "Female")),
+    education = factor(education, levels = c(1, 2, 3), 
+                       labels = c("Less than high school", "High school equivalent", "More than high school"))
+  ) |>
+  drop_na() |>
+  filter(age >= 21)
+full_data = left_join(covar_data, accel_data, by = "seqn")
 ```
