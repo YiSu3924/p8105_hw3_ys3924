@@ -143,9 +143,10 @@ According to above boxplot, the age distribution across education levels shows t
 ### Plot total activities against age
 
 ```{r, message=FALSE}
-full_data |>
-  mutate(total_activity = rowSums(across(starts_with("min")),na.rm = TRUE)) |>
-  ggplot(aes(x = age, y = total_activity, colour = sex)) +
+full_data = full_data |>
+  mutate(total_activity = rowSums(across(starts_with("min")),na.rm = TRUE))
+  
+ggplot(full_data, aes(x = age, y = total_activity, colour = sex)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "loess", se = FALSE) +
   facet_wrap(~education) +
@@ -159,3 +160,19 @@ From above plots, total activity of males and females decrease as age increase a
 
 
 ### Create plot for 24-hour activity time courses for each education level 
+
+```{r, warning=FALSE}
+full_data |>
+  pivot_longer(cols = starts_with("min"), names_to = "minute", values_to = "activity") |>
+  mutate(minute = as.numeric(str_remove(minute, "min"))) |>
+  ggplot(aes(x = minute, y = activity, color = sex)) +
+  geom_line(alpha = 0.3) +
+  geom_smooth() +
+  facet_wrap(~ education) +
+  labs(title = "24-Hour Activity Time Courses by Gender for Education Level", 
+       x = "Minute",
+       y = "Activity Level") +
+  theme_minimal()
+```
+
+By looking at above plot, activity peaks occur in the middle of the day and gradually decline afterward across all education levels. Overall activity patterns are similar between men and women across different education levels. Higher level of education is associated with more consistent activity levels and less fluctuation. 
