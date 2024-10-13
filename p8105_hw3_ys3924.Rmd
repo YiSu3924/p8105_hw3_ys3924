@@ -137,4 +137,25 @@ ggplot(full_data, aes(x = education, y = age, fill = sex)) +
   theme_minimal()
 ```
 
-According to above boxplot, the age distribution across education levels shows that individuals with less education, particularly "Less than high school", tend to  be slightly older. The "High school equivalent" category shows a younger age range for men than women. For the "More than high school" category, the distribution are similar, except that the median age for men is higher than women.
+According to above boxplot, the age distribution across education levels shows that individuals with less education, particularly "Less than high school", tend to  be slightly older. The "High school equivalent" category shows a younger age range for men than women. For the "More than high school" category, the distribution are similar, except that the median age for men is sligtly higher than women.
+
+
+### Plot total activities against age
+
+```{r, message=FALSE}
+full_data |>
+  mutate(total_activity = rowSums(across(starts_with("min")),na.rm = TRUE)) |>
+  ggplot(aes(x = age, y = total_activity, colour = sex)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~education) +
+  labs(title = "Total Activity vs. Age by Gender and Education Level",
+       x = "Age",
+       y = "Total Activity") +
+  theme_minimal()
+```
+
+From above plots, total activity of males and females decrease as age increase across all educational level. For "less than high school", the total activity for women is higher before age of 40, after which men's total activity starts to be larger. For "high school equivalent", the total activity for both men and women increases, but after age of 40 it decreases sharply. For "More than high school", the women's total activity is higher than men's for all age.
+
+
+### Create plot for 24-hour activity time courses for each education level 
