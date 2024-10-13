@@ -34,7 +34,7 @@ ny_noaa_row = nrow(ny_noaa)
 The dataset contains key variables id, date, prcp, snow, tmin, tmax. The dataset has `r ny_noaa_row` observations. There exists missing values for temperature, precipitation, or snowfall, which can affect analysis if not handled properly.
 
 
-Count the snow fall
+### Count the snow fall
 ```{r}
 snowfall_counts = ny_noaa |>
   count(snow) |>
@@ -108,9 +108,11 @@ covar_data = read_csv("./data/nhanes_covar.csv", skip = 3) |>
                        labels = c("Less than high school",
                                   "High school equivalent",
                                   "More than high school")),
-    age = as.numeric(age)
+    age = as.numeric(age),
+    bmi = as.numeric(bmi)
   ) |>
   drop_na() |>
+  arrange(education) |>
   filter(age >= 21)
 full_data = left_join(covar_data, accel_data, by = "seqn")
 ```
@@ -161,7 +163,7 @@ From above plots, total activity of males and females decrease as age increase a
 
 ### Create plot for 24-hour activity time courses for each education level 
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 full_data |>
   pivot_longer(cols = starts_with("min"), names_to = "minute", values_to = "activity") |>
   mutate(minute = as.numeric(str_remove(minute, "min"))) |>
@@ -201,7 +203,11 @@ july_2024 = read_csv("./data/citibike/July 2024 Citi.csv", na = c("NA", ".", "")
   janitor::clean_names() |>
   mutate(year = 2024,
          month = "July")
-citi_data = bind_rows(jan_2020, jan_2024, july_2020, july_2024)
+citi_data = bind_rows(jan_2020, jan_2024, july_2020, july_2024) |>
+  mutate(weekdays = factor(weekdays, 
+                      levels =c("Monday", "Tuesday", "Wednesday", "Thursday", 
+                                "Friday", "Saturday", "Sunday"))) |>
+  arrange(weekdays)
 citi_rows = nrow(citi_data)
 citi_cols = ncol(citi_data)
 ```
@@ -210,7 +216,7 @@ The cleaned and merged dataset contains `r citi_cols` variables and `r citi_rows
 
 ### Produce table showing the total number of rides
 
-```{r}
+```{r, message=FALSE}
 citi_data |>
   group_by(year, month, member_casual) |>
   summarise(total_rides = n()) |>
@@ -240,13 +246,13 @@ The 5 most popular starting stations for July 2024 are Pier 61 at Chelsea Piers,
 
 ```{r, message=FALSE}
 citi_data |> 
-  mutate(weekdays = factor(weekdays, 
-                      levels =c("Monday", "Tuesday", "Wednesday", "Thursday", 
-                                "Friday", "Saturday", "Sunday"))) |>
   group_by(year, month, weekdays) |>
   summarise(median_duration = median(duration, na.rm = TRUE)) |>
-  ggplot(aes(x = weekdays, y = median_duration)) +
-  geom_col() +
+  ggplot(aes(x = weekdays,
+             y = median_duration,
+             group = interaction(year, month),
+             color = month)) +
+  geom_line() +
   facet_grid(year ~ month) +
   labs(x = "Day of the Week", y = "Median Ride Duration", 
        title = "Median Ride Duration by Day, Month, and Year") +
@@ -256,3 +262,19 @@ citi_data |>
 
 According to above plots, July rides tend to have longer median durations compared to January in both years. Saturday and Sunday have longer median durations compared to weekdays, particularly in July. The median ride duration in 2020 is generally longer than the median ride duration in 2024.
 
+
+### Create plot shows the impact of month, membership status, and bike type on the distribution of ride duration
+
+```{r}
+citi_data |>
+  filter(year == 2024)|>
+  ggplot(aes(x = member_casual, y = duration, fill = rideable_type)) +
+  geom_boxplot() +
+  facet_wrap(~month) +
+  labs(title = "Impact of Ride Duration by Month, Membership Status and Bike Type",
+       x = "Membership Status", 
+       y = "Ride Duration") +
+  theme_minimal()
+```
+
+In July, both casual and member riders tend to have longer ride durations compared to January. Electric bikes have slightly smaller median ride durations compared to classic bikes in most cases. Casual riders have longer ride durations compared to members regardless the bike type or the month. 
