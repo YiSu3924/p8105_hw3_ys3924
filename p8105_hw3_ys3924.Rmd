@@ -236,3 +236,23 @@ july_2024 |>
 The 5 most popular starting stations for July 2024 are Pier 61 at Chelsea Piers, University Pl & E 14 St, W 21 St & 6 Ave, West St & Chambers St, and W 31 St & 7 Ave.
 
 
+### Create plot to investigate the effects of day of the week, month, and year on median ride duration
+
+```{r, message=FALSE}
+citi_data |> 
+  mutate(weekdays = factor(weekdays, 
+                      levels =c("Monday", "Tuesday", "Wednesday", "Thursday", 
+                                "Friday", "Saturday", "Sunday"))) |>
+  group_by(year, month, weekdays) |>
+  summarise(median_duration = median(duration, na.rm = TRUE)) |>
+  ggplot(aes(x = weekdays, y = median_duration)) +
+  geom_col() +
+  facet_grid(year ~ month) +
+  labs(x = "Day of the Week", y = "Median Ride Duration", 
+       title = "Median Ride Duration by Day, Month, and Year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+According to above plots, July rides tend to have longer median durations compared to January in both years. Saturday and Sunday have longer median durations compared to weekdays, particularly in July. The median ride duration in 2020 is generally longer than the median ride duration in 2024.
+
