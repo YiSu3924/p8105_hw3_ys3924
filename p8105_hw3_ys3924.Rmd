@@ -165,14 +165,47 @@ From above plots, total activity of males and females decrease as age increase a
 full_data |>
   pivot_longer(cols = starts_with("min"), names_to = "minute", values_to = "activity") |>
   mutate(minute = as.numeric(str_remove(minute, "min"))) |>
-  ggplot(aes(x = minute, y = activity, color = sex)) +
-  geom_line(alpha = 0.3) +
+  group_by(minute, sex, education) |>
+  summarize(avg_activity = mean(activity)) |>
+  ggplot(aes(x = minute, y = avg_activity, color = sex)) +
+  geom_line(alpha = 0.2) +
   geom_smooth() +
   facet_wrap(~ education) +
   labs(title = "24-Hour Activity Time Courses by Gender for Education Level", 
        x = "Minute",
-       y = "Activity Level") +
+       y = "Average Activity") +
   theme_minimal()
 ```
 
-By looking at above plot, activity peaks occur in the middle of the day and gradually decline afterward across all education levels. Overall activity patterns are similar between men and women across different education levels. Higher level of education is associated with more consistent activity levels and less fluctuation. 
+By looking at above plot, activity peaks occur in the middle of the day and gradually decline afterward across all education levels, which follows the human daily routine. Women tend to have higher activity levels than men across most of the day in all education levels, particularly in "More than high school" group. For "Less than high school" group, activity peaks around midday and gradually decreases. For "High school equivalent" group, the activity pattern is more stable. For "More than high school" group, it shows a slightly higher plateau compared to the other groups.
+
+
+# Problem 3
+
+### Read in and clean Citi Bike data
+
+```{r, message=FALSE}
+jan_2020 = read_csv("./data/citibike/Jan 2020 Citi.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  mutate(year = 2020,
+         month = "January")
+jan_2024 = read_csv("./data/citibike/Jan 2024 Citi.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  mutate(year = 2024,
+         month = "January")
+july_2020 = read_csv("./data/citibike/July 2020 Citi.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  mutate(year = 2020,
+         month = "July")
+july_2024 = read_csv("./data/citibike/July 2024 Citi.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  mutate(year = 2024,
+         month = "July")
+citi_data = bind_rows(jan_2020, jan_2024, july_2020, july_2024)
+citi_rows = nrow(citi_data)
+citi_cols = ncol(citi_data)
+```
+
+The cleaned and merged dataset contains `r citi_cols` variables and `r citi_rows` observations. The key variables include rideable_type, ride_id, weekdays, duration, start_station_name, end_station_name, member_casual, year, and month.
+
+
